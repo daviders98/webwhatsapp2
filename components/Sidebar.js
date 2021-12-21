@@ -4,20 +4,19 @@ import MoreVertIcon from '@material-ui/icons/MoreVert'
 import SearchIcon from '@material-ui/icons/Search'
 import styled from 'styled-components';
 import * as EmailValidator from 'email-validator'
+import { auth } from '../firebase';
 function Sidebar() {
-
     const createChat = () =>{
         const input = prompt('Please enter an email address for the user you wish to chat with.');
         if(!input) return null;
-
         if(EmailValidator.validate(input)){
-            
+            //TO-DO:
         }
     }
     return (
         <Container>
             <Header>
-                <UserAvatar/>
+                <UserAvatar onClick={()=>auth.signOut()}/>
                 <IconsContainer>
                     <IconButton>
                         <ChatIcon/>

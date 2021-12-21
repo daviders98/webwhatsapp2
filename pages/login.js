@@ -4,18 +4,16 @@ import styled from 'styled-components'
 import { auth, provider } from '../firebase'
 import {signInWithPopup} from 'firebase/auth'
 function Login() {
-
     const signIn = () =>{
-        provider.addScope('profile');
-        provider.addScope('email');
-        const result = signInWithPopup(auth, provider);
+        const result = signInWithPopup(auth, provider).catch(()=>{
+            console.log("User closed pop up sign in window")
+        });
     }
     return (
         <Container>
             <Head>
                 <title>Login</title>
             </Head>
-
             <LoginContainer>
                 <Logo src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/2042px-WhatsApp.svg.png"/>
                 <Button onClick={signIn} variant="outlined">Sign in with Google</Button>
