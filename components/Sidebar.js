@@ -4,15 +4,33 @@ import MoreVertIcon from '@material-ui/icons/MoreVert'
 import SearchIcon from '@material-ui/icons/Search'
 import styled from 'styled-components';
 import * as EmailValidator from 'email-validator'
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCollection} from 'react-firebase-hooks/firestore'
+import { addDoc,collection, query, where } from 'firebase/firestore';
+import Chat from './Chat';
 function Sidebar() {
+    const [user] = useAuthState(auth);
+
+    const userChatRef = collection(db,"chats")
+    const q = query(userChatRef,where("users","array-contains",user.email))
+    const [chatsSnapshot] = useCollection(q)
     const createChat = () =>{
         const input = prompt('Please enter an email address for the user you wish to chat with.');
         if(!input) return null;
-        if(EmailValidator.validate(input)){
+        //add chat into db if it doesnt exist already and is not the users email
+        if(EmailValidator.validate(input) && !chatExists(input) && input!== user.email ){
             //TO-DO:
+            addDoc(collection(db,"chats"),{
+                users:[user.email,input]
+            })
         }
     }
+
+    const chatExists = (recipientEmail) =>
+        !!chatsSnapshot?.docs.find(chat=>chat.data().users.find(user=>
+            user===recipientEmail)?.length>0
+        );
     return (
         <Container>
             <Header>
@@ -31,6 +49,10 @@ function Sidebar() {
                 <SearchInput placeholder="Search in Chats"/>
             </Search>
             <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
+
+            {chatsSnapshot?.docs.map((chat)=>(
+                <Chat key={chat.id} id={chat.id} users={chat.data().users} />
+            ))}
         </Container>
     )
 }
